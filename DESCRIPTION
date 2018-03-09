@@ -1,0 +1,11 @@
+Package: svyr2
+Type: Package
+Title: Tools for analyzing surveys (Title Case)
+Version: 0.1.0
+Author: mlgrm
+Maintainer: The package maintainer <mlgrm@mlgrm.net>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: gpl-2
+Encoding: UTF-8
+LazyData: true
