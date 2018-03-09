@@ -1,1 +1,5 @@
 exportPattern("^[[:alpha:]]+")
+import(xlsx)
+import(xml2)
+import(jsonlite)
+import(curl)
