@@ -39,7 +39,7 @@ as.data.frame.svq <- function(x,...){
       attr(c,"selected") <- n
       attr(c,"group") <- attr(x,"group")
       c
-    },df,colnames(x),SIMPLIFY = F))
+    },df,colnames(x),SIMPLIFY = F),...)
   } else {
     class(x) <- class(x)[class(x)!='svq']
     df <- data.frame(x,...)
