@@ -11,7 +11,7 @@ svy <- function(form=get.kobo.form(),data=get.kobo.data()){
 get.data <- function(node,group,data){
   # browser(expr=grepl("^_9_1_1",node$name))
   type <- make.names(node$type)
-  datum <- if(type %in% names(extract)) extract[[type]](node,group,data) else 
+  datum <- if(type %in% names(extract)) extract[[type]](node,group,data) else
     extract$text(node,group,data)
   attr(datum,"node") <- node
   attr(datum,"group") <- group
@@ -31,7 +31,7 @@ extract$survey <- function(node,group,data){
   s
 }
 
-#' the default type and underlying retrieval function for all other atomic 
+#' the default type and underlying retrieval function for all other atomic
 #' types
 extract$text <- function(node,group,data){
   field.name <- paste(c(group,node$name),collapse="/")
@@ -79,8 +79,8 @@ extract$start <- extract$end <- extract$dateTime
 extract$select.one <- function(node,group,data){
   r <- extract$text(node,group,data)
   lang <- getOption("svyLang","default")
-  if(lang=="default") lang <- names(node$label)[1] else 
-    if(!(lang %in% names(node$label))) 
+  if(lang=="default") lang <- names(node$label)[1] else
+    if(!(lang %in% names(node$label)))
       stop(paste("language", lang, "not available in node", node$name))
   r <- factor(r,levels=sapply(node$children,getElement,"name"))
   attr(r,"labels") <- ifelse(length(node$children[[1]]$label)==1,
@@ -93,14 +93,14 @@ extract$select.one <- function(node,group,data){
 #' and colnames
 extract$select.all.that.apply <- function(node,group,data){
   x <- extract$text(node,group,data)
-  
+
   lang <- getOption("svyLang","default")
   if(lang=="default") lang <- names(node$label)[1]
   x <- lapply(strsplit(x,' '),function(r){
     is.element(seq_len(length(node$children)),r)
   })
   x <- do.call(rbind,x)
-  
+
   colnames(x) <- sapply(node$children,getElement,"name")
   attr(x,"labels") <- ifelse(length(node$children[[1]]$label)==1,
                      sapply(node$children,getElement,"label"),
@@ -110,18 +110,18 @@ extract$select.all.that.apply <- function(node,group,data){
 
 #' extracts all the data in a group recursively, with special behaviour for
 #' repeats.
-fun2 <- function(node,group,data){
+extract$group <- function(node,group,data){
   group <- c(group,node$name)
   df <- lapply(node$children,get.data,group=group,data=data)
   names(df) <- sapply(node$children,getElement,"name")
   class(df) <- c("svg",class(df))
   df
 }
-extract$group <- fun2
+# extract$group <- fun2
 
-#' extracts all the data in a repeat group as a separate "survey" for each 
+#' extracts all the data in a repeat group as a separate "survey" for each
 #' respondent
-fun1 <- function(node,group,data){ # repeat is a reserved word
+extract$repeat. <- function(node,group,data){ # repeat is a reserved word
   # this is a node of type repeat which has one child for every question asked
   # to every family member.  we return a list of surveys, one for each household
   # the function applies extract$survey on each data set using the same node
@@ -133,9 +133,9 @@ fun1 <- function(node,group,data){ # repeat is a reserved word
   class(l) <- c("svr", class(l))
   l
 }
-extract$repeat. <- fun1
+# extract$repeat. <- fun1
 
-  
+
 # these two functions borrowed from:
 # https://github.com/mrdwab/koboloadeR
 
