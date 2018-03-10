@@ -13,7 +13,7 @@ make.sql.names <- function(df,max.len=63){
   i <- 0
   repeat{
     ns <- substr(ns,1,max.len-i)
-    ns <- make.unique(ns)
+    ns <- make.unique(ns,sep = "_")
     if(max(sapply(ns,nchar)<=max.len)) break
     i <- i+1
   }
