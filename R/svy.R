@@ -1,4 +1,3 @@
-options(stringsAsFactors = FALSE)
 library(jsonview)
 
 svy <- function(form=get.kobo.form(),data=get.kobo.data()){
