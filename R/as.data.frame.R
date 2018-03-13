@@ -84,10 +84,7 @@ as.data.frame.svr <- function(r, simplify=FALSE, ...){
     attr(ind,"node") <- attr(r,"node")
 
     # the rbound dfs are now the data attribute of the svr
-    attr(ind,"data") <- do.call(rbind,lapply(1:length(r), function(i){
-      df <- as.data.frame(r[[i]],...)
-      df <- cbind(ind=rep(i,nrow(df)),df)
-    }))
+    attr(ind,"data") <- data(r)
     data.frame(ind,...)
   }
 }
