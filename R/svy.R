@@ -128,6 +128,7 @@ extract$repeat. <- function(node,group,data){ # repeat is a reserved word
   # this is a kind of group so push the name onto group
   group <- c(group,node$name)
   datl <- lapply(data,getElement,paste0(group,collapse='/'))
+  names(datl) <- 1:length(datl)
   node$type <- "survey"
   l <- lapply(datl,function(d)get.data(node,group,d))
   class(l) <- c("svr", class(l))
