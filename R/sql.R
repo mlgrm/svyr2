@@ -17,6 +17,6 @@ make.sql.names <- function(df,max.len=63){
     if(max(sapply(ns,nchar)<=max.len)) break
     i <- i+1
   }
-  cat(i,"\n")
+  # cat(i,"\n")
   ns
 }

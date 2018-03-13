@@ -56,6 +56,7 @@ extract$decimal <- function(node,group,data){
 #' wrapper for retrieving gps coordinates
 extract$geopoint <- function(node,group,data){
   m <- do.call(rbind, strsplit(extract$text(node,group,data),' '))
+  class(m) <- "numeric"
   colnames(m) <- c("latitude","longitude","altitude","precision")
   m
 }
