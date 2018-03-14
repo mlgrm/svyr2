@@ -1,14 +1,21 @@
 library(dplyr)
 
 node <- function(x)attr(x,"node")
-name <- function(x)attr(x,"node")$name
-type <- function(x)attr(x,"node")$type
+name <- function(x,use.node=TRUE){
+  if(use.node) x <- node(x)
+  x$name
+}
+type <- function(x,use.node=TRUE){
+  if(use.node) x <- node(x)
+  x$type
+}
 label <- function(x,use.node=TRUE){
   if(use.node) node <- node(x) else node <- x
   ifelse(is.list(node$label),
   node$label[[getOption("svyLang","English")]],
   ifelse(is.null(node$label),"",node$label))
 }
+
 labels <- function(x)sapply(node(x)$children,label,use.node=FALSE)
 
 selected <- function(x)attr(x,"selected")
