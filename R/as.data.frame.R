@@ -13,7 +13,8 @@ as.data.frame.svy <- function(s,simplify=TRUE,odk.names=TRUE,...){
   s <- mapply(function(e,a){
     # browser(expr=(any(sapply(e,length)==0)))
     attr(e,"node") <- a
-    as.data.frame(e, stringsAsFactors=FALSE)
+    e <- as.data.frame(e, stringsAsFactors=FALSE)
+    e
   }, s, node, SIMPLIFY = FALSE)
   s <- s[!sapply(s,is.null)]
   if(length(s)==0) return(NULL)
@@ -22,8 +23,8 @@ as.data.frame.svy <- function(s,simplify=TRUE,odk.names=TRUE,...){
   if(odk.names)
     names(df) <- sapply(df,function(c){
       n <- name(c)
+      if(type(c)=="select all that apply") n <- paste(n,selected(c),sep=":")
       if(length(group(c))>0) n <- c(group(c),n)
-      if(type(c)=="select all that apply") n <- c(n,selected(c))
       n <- paste(n,collapse = "/")
       n
     })
@@ -31,22 +32,32 @@ as.data.frame.svy <- function(s,simplify=TRUE,odk.names=TRUE,...){
 }
 
 as.data.frame.svq <- function(x,...){
-  if(type(x)=="note") return()
+  if(type(x)=="note"){
+    return()
+  }
   if(is.matrix(x)){
+    # if it's a matrix, it's probably select_multiple or geopoint
+    # separate columns to a data.frame
     df <- as.data.frame.matrix(x,...)
-    df <- as.data.frame(mapply(function(c,n){
+    # use the column names to give each column a selected attr
+  df <- preserve(mapply(function(c,n){
       attr(c,"node") <- attr(x,"node")
       attr(c,"selected") <- n
       attr(c,"group") <- attr(x,"group")
+      attr(c,"type") <- attr(x,"type")
       c
-    },df,colnames(x),SIMPLIFY = F),...)
+    },df,colnames(x),SIMPLIFY = F),as.data.frame,...)
+    names(df) <- sapply(df,selected)
   } else {
+    # all other types should be vectors
+    # remove the svq class
     class(x) <- class(x)[class(x)!='svq']
+    # turn the vector into a one-column data.frame for cbinding
     df <- data.frame(x,...)
     browser(expr=(length(df)==0))
     names(df) <- attr(x,"node")$name
-    df
   }
+  df
 }
 
 

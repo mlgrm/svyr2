@@ -1,3 +1,4 @@
+library(plyr)
 library(dplyr)
 
 node <- function(x)attr(x,"node")
@@ -11,12 +12,28 @@ type <- function(x,use.node=TRUE){
 }
 label <- function(x,use.node=TRUE){
   if(use.node) node <- node(x) else node <- x
-  ifelse(is.list(node$label),
-  node$label[[getOption("svyLang","English")]],
-  ifelse(is.null(node$label),"",node$label))
+  lbl <- ifelse(is.list(node$label),
+                node$label[[getOption("svyLang","English")]],
+                ifelse(is.null(node$label),"",node$label))
+  # we can only get the question and answer if we got the whole datum
+  if(use.node && type(x)=="select all that apply")
+    lbl <- paste(lbl,labels(x)[selected(x)],sep=":")
+  lbl
 }
 
-labels <- function(x)sapply(node(x)$children,label,use.node=FALSE)
+preserve <- function(df,fun,...){
+  atts <- lapply(df,attributes)
+  df <- fun(df,...)
+  for(i in 1:ncol(df)) attributes(df[[i]]) <- atts[[i]]
+  df
+}
+
+labels <- function(x,use.node=TRUE){
+  if(use.node) node <- node(x) else node <- x
+  lbls <- sapply(node$children,label,use.node=FALSE)
+  names(lbls) <- sapply(node$children,name,use.node=FALSE)
+  lbls
+}
 
 selected <- function(x)attr(x,"selected")
 group <- function(x)attr(x,"group")

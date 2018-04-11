@@ -1,5 +1,7 @@
 library(jsonview)
 
+
+
 svy <- function(form=get.kobo.form(),data=get.kobo.data()){
   # extracting a survey is just like extracting a roster
   s <- get.data(form,NULL,data)
@@ -82,7 +84,8 @@ extract$select.one <- function(node,group,data){
   if(lang=="default") lang <- names(node$label)[1] else
     if(!(lang %in% names(node$label)))
       stop(paste("language", lang, "not available in node", node$name))
-  r <- factor(r,levels=sapply(node$children,getElement,"name"))
+  lvl <- make.unique(sapply(node$children,getElement,"name"))
+  r <- factor(r,levels=lvl)
   attr(r,"labels") <- ifelse(length(node$children[[1]]$label)==1,
                      sapply(node$children,getElement,"label"),
                      sapply(node$children,function(ch)ch$label[[lang]][[1]]))
@@ -101,7 +104,7 @@ extract$select.all.that.apply <- function(node,group,data){
   })
   x <- do.call(rbind,x)
 
-  colnames(x) <- sapply(node$children,getElement,"name")
+  colnames(x) <- make.unique(sapply(node$children,getElement,"name"))
   attr(x,"labels") <- ifelse(length(node$children[[1]]$label)==1,
                      sapply(node$children,getElement,"label"),
                      sapply(node$children,function(ch)ch$label[[lang]]))
