@@ -21,11 +21,20 @@ label <- function(x,use.node=TRUE){
   lbl
 }
 
-preserve <- function(df,fun,...){
-  atts <- lapply(df,attributes)
-  df <- fun(df,...)
-  for(i in 1:ncol(df)) attributes(df[[i]]) <- atts[[i]]
-  df
+preserve <- function(x,...) UseMethod("preserve", x)
+preserve.list <- function(l,fun,omit=NULL,...){
+  atts <- lapply(l,attributes)
+  atts <- atts[!(names(atts) %in% omit)]
+  df <- fun(l,...)
+  for(i in 1:length(l)) attributes(l[[i]])[names(atts[[i]])] <- atts[[i]]
+  l
+}
+preserve.default <- function(x,fun,omit=NULL,...){
+  atts <- attributes(x)
+  atts <- atts[!(names(atts)%in%omit)]
+  x <- fun(x)
+  attributes(x)[names(atts)] <- atts
+  x
 }
 
 labels <- function(x,use.node=TRUE){

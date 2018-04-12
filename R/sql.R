@@ -16,6 +16,12 @@ connect <- function(host=getOption("svyDBHost"),
           )
 }
 
+doSQL <- function(statement,...)
+  dbClearResult(
+    dbSendQuery(getOption("svyDBConnection"),statement, ...)
+  )
+
+
 push <- function(df,name=deparse(substitute(df),...),
                  schema=getOption("svyDBSchema",NULL),
                  indexes=NULL,
@@ -25,25 +31,27 @@ push <- function(df,name=deparse(substitute(df),...),
                     type=sapply(df,type),
                     label=sapply(df,label))
   names(df) <- map$db.name
-  fullname <- paste(schema,name,sep=".")
   connect(...)
   con <- getOption("svyDBConnection")
+  suppressWarnings(doSQL(paste("create schema if not exists",
+                               getOption("svyDBSchema"))))
+  doSQL(paste("set search_path to",getOption("svyDBSchema")))
   copy_to(con,df,
-          name=fullname,
+          name=name,
           temporary=FALSE,
           overwrite=overwrite,
           indexes=indexes
   )
   copy_to(con,map,
-          name=paste(fullname,"map",sep="_"),
+          name=paste(name,"map",sep="_"),
           temporary=FALSE,
           overwrite=overwrite,
           indexes=list("db.name")
   )
-  t <- tbl(con,fullname)
-  m <- tbl(con,paste(fullname,"map",sep="_"))
+  t <- tbl(con,name)
+  m <- tbl(con,paste(name,"map",sep="_"))
   #dbDisconnect(getOption("svyDBConnection"))
-  list(data=t,map=m)
+  invisible(list(data=t,map=m))
 }
 
 # raw applies to plain data.frames, so the attributes are not checked
