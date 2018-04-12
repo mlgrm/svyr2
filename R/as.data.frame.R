@@ -40,14 +40,14 @@ as.data.frame.svq <- function(x,...){
     # separate columns to a data.frame
     df <- as.data.frame.matrix(x,...)
     # use the column names to give each column a selected attr
-  df <- preserve(mapply(function(c,n){
-      attr(c,"node") <- attr(x,"node")
-      attr(c,"selected") <- n
-      attr(c,"group") <- attr(x,"group")
-      attr(c,"type") <- attr(x,"type")
-      c
-    },df,colnames(x),SIMPLIFY = F),as.data.frame,...)
-    names(df) <- sapply(df,selected)
+  # df <- preserve(mapply(function(c,n){
+  #     attr(c,"node") <- attr(x,"node")
+  #     attr(c,"selected") <- n
+  #     attr(c,"group") <- attr(x,"group")
+  #     attr(c,"type") <- attr(x,"type")
+  #     c
+  #   },df,colnames(x),SIMPLIFY = F),as.data.frame,...)
+    # names(df) <- sapply(df,selected)
   } else {
     # all other types should be vectors
     # remove the svq class

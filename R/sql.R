@@ -3,36 +3,40 @@ library(dbplyr)
 library(DBI)
 library(RPostgres)
 
-connect <- function(host=getOption("svyDBHost"),
+connection <- function(host=getOption("svyDBHost"),
                     user=getOption("svyDBUser"),
                     password=getOption("svyDBPassword"),
                     dbname=getOption("svyDBName")){
-  options(svyDBConnection=dbConnect(Postgres(),
-                                    host=host,
-                                    user=user,
-                                    password=password,
-                                    dbname=dbname
-                                    )
-          )
+  if(!("svyDBConnection" %in% names(options())))
+    options(svyDBConnection=dbConnect(Postgres(),
+                                      host=host,
+                                      user=user,
+                                      password=password,
+                                      dbname=dbname
+    ))
+  getOption("svyDBConnection")
 }
 
 doSQL <- function(statement,...)
   dbClearResult(
-    dbSendQuery(getOption("svyDBConnection"),statement, ...)
+    dbSendQuery(connection(),statement, ...)
   )
 
 
 push <- function(df,name=deparse(substitute(df),...),
                  schema=getOption("svyDBSchema",NULL),
                  indexes=NULL,
-                 overwrite=FALSE,...){
-  map <- data.frame(name=names(df),
-                    db.name=make.sql.names(names(df)),
+                 overwrite=FALSE,
+                 make.map=true, ...){
+  db.names <- make.sql.names(names(df))
+  if(make.map)
+    map <- data.frame(name=names(df),
+                    db.name=db.names,
                     type=sapply(df,type),
                     label=sapply(df,label))
-  names(df) <- map$db.name
-  connect(...)
-  con <- getOption("svyDBConnection")
+  names(df) <- db.names
+  # connect(...)
+  con <- connection()
   suppressWarnings(doSQL(paste("create schema if not exists",
                                getOption("svyDBSchema"))))
   doSQL(paste("set search_path to",getOption("svyDBSchema")))
@@ -42,7 +46,7 @@ push <- function(df,name=deparse(substitute(df),...),
           overwrite=overwrite,
           indexes=indexes
   )
-  copy_to(con,map,
+  if(make.map) copy_to(con,map,
           name=paste(name,"map",sep="_"),
           temporary=FALSE,
           overwrite=overwrite,
