@@ -22,19 +22,25 @@ label <- function(x,use.node=TRUE){
 }
 
 preserve <- function(x,...) UseMethod("preserve", x)
-preserve.list <- function(l,fun,omit=NULL,...){
-  atts <- lapply(l,attributes)
-  atts <- atts[!(names(atts) %in% omit)]
-  df <- fun(l,...)
-  for(i in 1:length(l)) attributes(l[[i]])[names(atts[[i]])] <- atts[[i]]
-  l
+
+preserve.list <- function(
+  l, fun,
+  incl=getOption("svyAttrIncl",names(attributes(x))),
+  incl.list=getOption("svyAttrInclList", c(
+    "node",
+    "data"
+  )),...){
+  l0 <- fun(l)
+  for(i in 1:length(l)) attributes(l0[[i]])[incl] <- attributes(l[[i]])[incl]
+  attributes(l0)[incl.list] <- attributes(l)[incl.list]
+  if(class(l)[1]!=class(l0)[1]) class(l0) <- c(class(l)[1],class(l0))
+  l0
 }
-preserve.default <- function(x,fun,omit=NULL,...){
-  atts <- attributes(x)
-  atts <- atts[!(names(atts)%in%omit)]
-  x <- fun(x)
-  attributes(x)[names(atts)] <- atts
-  x
+preserve.default <- function(
+  x,fun,incl=getOption("svyAttrIncl",names(attributes(x))),...){
+  x0 <- fun(x,...)
+  attributes(x0)[incl] <- attributes(x)[incl]
+  x0
 }
 
 labels <- function(x,use.node=TRUE){
@@ -69,10 +75,12 @@ counts <- list(
 
 data <- function(x) UseMethod("data", x)
 data.svr <- function(x,...){
-  ldply(x, function(df){
-    df <- as.data.frame(df,...)
-    df
-  },.id="id")
+  l <- lapply(names(x),function(n){
+    df <- as.data.frame(x[[n]])
+    # if(is(tryCatch(rep(n,nrow(df)),error=identity),"error"))browser()
+    df <- cbind(id=rep(n,nrow(df)),df)
+  })
+  do.call(rbind,l)
 }
 data.svq <- identity
 data.svg <- function(x)attr(x,"data")

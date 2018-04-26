@@ -4,13 +4,13 @@ library(jsonview)
 
 svy <- function(form=get.kobo.form(),data=get.kobo.data()){
   # extracting a survey is just like extracting a roster
+  if(is.null(data))browser()
   s <- get.data(form,NULL,data)
   s
 }
 
 #' wrapper function for the functions in the list "extract"
 get.data <- function(node,group,data){
-  # browser(expr=grepl("^_9_1_1",node$name))
   type <- make.names(node$type)
   datum <- if(type %in% names(extract)) extract[[type]](node,group,data) else
     extract$text(node,group,data)
@@ -77,6 +77,10 @@ extract$dateTime <- function(node,group,data){
 
 extract$start <- extract$end <- extract$dateTime
 
+extract$note <- function(node,group,data){
+  browser()
+  rep('',length(data))
+}
 #' retrieves "select one" data as a factor with correct labels
 extract$select.one <- function(node,group,data){
   r <- extract$text(node,group,data)
@@ -86,9 +90,10 @@ extract$select.one <- function(node,group,data){
       stop(paste("language", lang, "not available in node", node$name))
   lvl <- make.unique(sapply(node$children,getElement,"name"))
   r <- factor(r,levels=lvl)
-  attr(r,"labels") <- ifelse(length(node$children[[1]]$label)==1,
-                     sapply(node$children,getElement,"label"),
-                     sapply(node$children,function(ch)ch$label[[lang]][[1]]))
+  if(length(node$children[[1]]$label)==1)
+    attr(r,"labels") <- sapply(node$children,getElement,"label") else
+      attr(r,"labels") <- sapply(node$children,
+                                 function(ch)ch$label[[lang]][[1]])
   r
 }
 
@@ -96,7 +101,6 @@ extract$select.one <- function(node,group,data){
 #' and colnames
 extract$select.all.that.apply <- function(node,group,data){
   x <- extract$text(node,group,data)
-
   lang <- getOption("svyLang","default")
   if(lang=="default") lang <- names(node$label)[1]
   x <- lapply(strsplit(x,' '),function(r){
@@ -105,9 +109,10 @@ extract$select.all.that.apply <- function(node,group,data){
   x <- do.call(rbind,x)
 
   colnames(x) <- make.unique(sapply(node$children,getElement,"name"))
-  attr(x,"labels") <- ifelse(length(node$children[[1]]$label)==1,
-                     sapply(node$children,getElement,"label"),
-                     sapply(node$children,function(ch)ch$label[[lang]]))
+  if(length(node$children[[1]]$label)==1)
+    attr(x,"labels") <- sapply(node$children,getElement,"label") else
+      attr(x,"labels") <- sapply(node$children,
+                                 function(ch)ch$label[[lang]][[1]])
   x
 }
 

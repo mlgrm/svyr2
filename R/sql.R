@@ -23,12 +23,16 @@ doSQL <- function(statement,...)
   )
 
 
-push <- function(df,name=deparse(substitute(df),...),
+push <- function(s,name=deparse(substitute(df),...),
                  schema=getOption("svyDBSchema",NULL),
                  indexes=NULL,
                  overwrite=FALSE,
                  make.map=true, ...){
-  db.names <- make.sql.names(names(df))
+  if(is.svy){
+
+  }
+  s <- flatten(s)
+  db.names <- make.sql.names(names(s))
   if(make.map)
     map <- data.frame(name=names(df),
                     db.name=db.names,
@@ -59,7 +63,8 @@ push <- function(df,name=deparse(substitute(df),...),
 }
 
 # raw applies to plain data.frames, so the attributes are not checked
-make.sql.names <- function(ns,max.len=63,raw=FALSE,remove.group=TRUE){
+make.sql.names <- function(
+  ns, max.len=63,raw=FALSE,remove.group=TRUE,group.delimiter=c("/",".")){
   if(remove.group) ns <- sub("^.*/","",ns)
   ns <- tolower(ns)
   ns <- ifelse(ns %in% tolower(.SQL92Keywords), paste0(ns,"_"),ns)

@@ -11,8 +11,7 @@ labelize.svq <- function(q){
            # message(paste(group(q),collapse = "."),".",name(q))
            # if(name(q)=="cooks_gender") browser()
            q <- preserve(q,function(x)
-             factor(x,levels=levels(x),labels=labels(x)),
-             omit="levels")
+             factor(x,levels=levels(x),labels=labels(x)))
            q
          },
          "select all that apply"={
