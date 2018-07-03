@@ -12,7 +12,7 @@ get.kobo.doc <- function(path, data=NULL, method="GET", flags="",
   of <- tempfile()
   if(is.null(data)) dat <- "" else dat <- paste("-d",data,collapse = " ")
   cmd <- sprintf(
-    "curl -X %s %s %s %s/api/v1/%s -H \"Authorization: Token %s\" > %s",
+    "curl -X %s --ignore-content-length %s %s %s/api/v1/%s -H \"Authorization: Token %s\" > %s",
     method, paste0(flags, collapse=" "),
     dat, server, path, token, of
   )

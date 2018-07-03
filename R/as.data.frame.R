@@ -9,7 +9,7 @@ as.data.frame <- function(x,...) UseMethod("as.data.frame",x)
 as.data.frame.svy <- function(s, labels=TRUE){
   s <- flatten(s)
   s1 <- lapply(s,function(e){
-    cat(class(e),"\n")
+    # cat(class(e),"\n")
     as.data.frame(e)
   })
   browser(expr=is(tryCatch(as.data.frame.list(s1),error=identity),"error"))
@@ -47,16 +47,22 @@ as.data.frame.svq <- function(x,...){
   #   return()
   # }
   if(is.matrix(x)){
-    df <- as.data.frame.matrix(x,...)
+    df <- as.data.frame(lapply(colnames(x),function(n){
+      col <- x[,n]
+      attr(col,"node") <- node(x)
+      attr(col,"node")$name <- paste(name(x),n,sep = ":")
+      col
+    }),...)
   } else {
     # all other types should be vectors
     # remove the svq class
     class(x) <- class(x)[class(x)!='svq']
     # turn the vector into a one-column data.frame for cbinding
-    df <- data.frame(x,...)
-    browser(expr=(length(df)==0))
-    names(df) <- attr(x,"node")$name
+    df <- data.frame(x)
+    browser(expr=(length(df)!=1))
+    names(df) <- name(x)
   }
+  browser(expr=any(grepl("\\.NA$",names(df))))
   df
 }
 

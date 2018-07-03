@@ -1,7 +1,6 @@
 library(jsonview)
 
 
-
 svy <- function(form=get.kobo.form(),data=get.kobo.data()){
   # extracting a survey is just like extracting a roster
   if(is.null(data))browser()
@@ -78,7 +77,6 @@ extract$dateTime <- function(node,group,data){
 extract$start <- extract$end <- extract$dateTime
 
 extract$note <- function(node,group,data){
-  browser()
   rep('',length(data))
 }
 #' retrieves "select one" data as a factor with correct labels

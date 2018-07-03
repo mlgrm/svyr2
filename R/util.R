@@ -12,34 +12,40 @@ type <- function(x,use.node=TRUE){
 }
 label <- function(x,use.node=TRUE){
   if(use.node) node <- node(x) else node <- x
-  lbl <- ifelse(is.list(node$label),
-                node$label[[getOption("svyLang","English")]],
-                ifelse(is.null(node$label),"",node$label))
+  lbl <- if(is.list(node$label))
+            node$label[[getOption("svyLang","English")]] else
+                if(is.null(node$label)) "" else node$label
   # we can only get the question and answer if we got the whole datum
-  if(use.node && type(x)=="select all that apply")
+  if(use.node && !is.null(type(x)) && type(x)=="select all that apply")
     lbl <- paste(lbl,labels(x)[selected(x)],sep=":")
   lbl
 }
 
-preserve <- function(x,...) UseMethod("preserve", x)
+preserve <- function(x,fun,...) UseMethod("preserve", x)
 
 preserve.list <- function(
-  l, fun,
-  incl=getOption("svyAttrIncl",names(attributes(x))),
+  l, fun,...){
+  incl=getOption("svyAttrIncl",names(attributes(x)))
   incl.list=getOption("svyAttrInclList", c(
     "node",
+    "group",
     "data"
-  )),...){
-  l0 <- fun(l)
+  ))
+  l0 <- fun(l,...)
   for(i in 1:length(l)) attributes(l0[[i]])[incl] <- attributes(l[[i]])[incl]
   attributes(l0)[incl.list] <- attributes(l)[incl.list]
   if(class(l)[1]!=class(l0)[1]) class(l0) <- c(class(l)[1],class(l0))
   l0
 }
+
+preserve.data.frame <- preserve.list
+
 preserve.default <- function(
   x,fun,incl=getOption("svyAttrIncl",names(attributes(x))),...){
+  # browser()
   x0 <- fun(x,...)
   attributes(x0)[incl] <- attributes(x)[incl]
+  if(class(x0)[1]!=class(x)[1]) class(x0) <- c(class(x)[1],class(x0))
   x0
 }
 
@@ -85,3 +91,15 @@ data.svr <- function(x,...){
 data.svq <- identity
 data.svg <- function(x)attr(x,"data")
 data.svy <- function(x)attr(x,"data")
+
+apply <- function(x,f,...)UseMethod("apply", x)
+
+apply.svy <- function(s,f,...)preserve(s,function(x)
+  lapply(x,function(x1){
+    browser()
+    apply(x1,f,...)
+  })
+)
+apply.svg <- apply.svy
+apply.svr <- apply.svy
+apply.svq <- function(x,f,...)preserve(x,f,...)
