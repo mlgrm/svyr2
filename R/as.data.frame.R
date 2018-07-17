@@ -1,7 +1,15 @@
 flatten <- function(x) UseMethod("flatten",x)
 flatten.svq <- list
-flatten.svg <- function(x)do.call(c,lapply(x,flatten))
-flatten.svy <- flatten.svg
+flatten.svg <- function(x){
+  # browser()
+  do.call(c,c(lapply(x,flatten),use.names=F))
+}
+flatten.svy <- function(x){
+  # browser()
+  x <- flatten.svg(x)
+  names(x) <- sapply(x,function(y)paste0(c(group(y),name(y)),collapse = "/"))
+  x
+}
 flatten.svr <- list
 
 as.data.frame <- function(x,...) UseMethod("as.data.frame",x)

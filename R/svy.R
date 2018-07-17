@@ -35,11 +35,13 @@ extract$survey <- function(node,group,data){
 #' types
 extract$text <- function(node,group,data){
   field.name <- paste(c(group,node$name),collapse="/")
-  dat <- sapply(data,function(r){
-    val <- paste(as.character(r[[field.name]]),collapse=", ")
-    if(val=="") val <- NA_character_
-    val
-  })
+  if(is.data.frame(data)) 
+    dat <- as.character(data[[field.name]]) else
+      dat <- sapply(data,function(r){
+        val <- paste(as.character(r[[field.name]]),collapse=", ")
+        if(val=="") val <- NA_character_
+        val
+      })
   # class(dat) <- c("svq",class(dat))
   dat
 }
@@ -98,6 +100,7 @@ extract$select.one <- function(node,group,data){
 #' retrieves "select all that apply" data as a logical matrix with correct labels
 #' and colnames
 extract$select.all.that.apply <- function(node,group,data){
+  # browser(expr=(node$name=="migration"))
   x <- extract$text(node,group,data)
   lang <- getOption("svyLang","default")
   if(lang=="default") lang <- names(node$label)[1]
